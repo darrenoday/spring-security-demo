@@ -16,6 +16,10 @@ public class RegistrationController {
         this.userService = userService;
     }
 
+    @GetMapping
+    public String registrationPage() {
+        return "Register by sending a POST request with username and password.";
+    }
     // Use @RequestBody to receive a UserDTO object in the request body
     @PostMapping
     public String registerUser(@RequestBody UserDTO userDTO) {

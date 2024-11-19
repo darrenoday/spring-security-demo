@@ -1,19 +1,16 @@
+
 package com.example.demo;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
-import static org.springframework.security.config.Customizer.withDefaults;
-
 @Configuration
-@EnableWebSecurity
 public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
@@ -25,12 +22,12 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf().disable()  // Disable CSRF for simplicity, not recommended in production
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/register").permitAll()  // Allow /register endpoint without authentication
-                        .anyRequest().authenticated()             // Require authentication for all other requests
+                .csrf(csrf -> csrf.disable()) // Disable CSRF for testing (enable in production)
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/register").permitAll() // Allow public access to /register
+                        .anyRequest().authenticated() // All other endpoints require authentication
                 )
-                .httpBasic(withDefaults());  // Enable HTTP Basic authentication
+                .httpBasic(httpBasic -> {}); // Enable HTTP Basic authentication
 
         return http.build();
     }
@@ -41,11 +38,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
-        return http.getSharedObject(AuthenticationManagerBuilder.class)
-                .userDetailsService(userDetailsService)
-                .passwordEncoder(passwordEncoder())
-                .and()
-                .build();
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
     }
 }
